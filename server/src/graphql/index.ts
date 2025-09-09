@@ -1,4 +1,5 @@
 import { ApolloServer } from "@apollo/server";
+import { User } from "./users/index.js";
 
 async function startGQLServer() {
 
