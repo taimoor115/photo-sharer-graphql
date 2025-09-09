@@ -7,7 +7,8 @@ async function startGQLServer() {
         typeDefs: `
             ${User.typeDefs}
             type Query {
-                ${User.queries}
+              ${User.queries}
+              _empty: String
             }
             type Mutation {
                 ${User.mutations}

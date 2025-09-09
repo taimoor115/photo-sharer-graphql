@@ -1,5 +1,5 @@
 import { V4 } from "paseto";
-import { PASETO_PRIVATE_KEY, PASETO_PUBLIC_KEY } from "../config/env.config";
+import { PASETO_PRIVATE_KEY, PASETO_PUBLIC_KEY } from "../config/env.config.js";
 
 
 export async function generatePasetoToken(payload: object) {
