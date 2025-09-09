@@ -1,0 +1,47 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: .. # go one level up (to /server)
+      dockerfile: container/Dockerfile
+    container_name: photoshare-backend
+    ports:
+      - "4000:4000"
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/photoshare
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: supersecret
+    volumes:
+      - ../:/app # mount /server inside container
+      - /app/node_modules
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgres:14
+    container_name: photoshare-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: photoshare
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    pull_policy: never
+
+  redis:
+    image: redis:7
+    container_name: photoshare-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  postgres_data:
+  redis_data:
