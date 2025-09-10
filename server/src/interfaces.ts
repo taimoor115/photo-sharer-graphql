@@ -9,3 +9,8 @@ export interface PASETO_TOKEN {
     iat: string;
     exp: string;
 }
+
+export interface CreatePostPayload {
+    caption: string;
+    imageUrl: string;
+}

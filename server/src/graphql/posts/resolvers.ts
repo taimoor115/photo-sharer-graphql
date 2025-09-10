@@ -1,8 +1,9 @@
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { AWS_ACCESS_ID, AWS_DEFAULT_REGION, AWS_SECRET_KEY, BUCKET_NAME } from "../../config/env.config.js";
-import type { GraphqlContext } from "../../interfaces.js";
+import type { CreatePostPayload, GraphqlContext } from "../../interfaces.js";
 import { handleError } from "../../utils/error.util.js";
+import { PostService } from "../../services/post.js";
 
 
 
@@ -13,7 +14,21 @@ const s3Client = new S3Client({
         secretAccessKey: AWS_SECRET_KEY!,
     }
 });
-const mutations = {}
+const mutations = {
+    createPost: async (
+        _: any,
+        { payload }: { payload: CreatePostPayload },
+        ctx: GraphqlContext
+    ) => {
+        if (!ctx.user) throw new Error("You are not authenticated");
+        const post = await PostService.createPost({
+            ...payload,
+            userId: ctx.user.sub,
+        });
+
+        return post;
+    },
+}
 const queries = {
     getSignedUrlForPost: async (
         _: any,
