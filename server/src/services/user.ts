@@ -1,8 +1,8 @@
 
 import bcrypt from "bcrypt";
 import prismaClient from "../lib/db.js";
-import { generatePasetoToken } from "../utils/token.util.js";
 import { handleError } from "../utils/error.util.js";
+import { generatePasetoToken } from "../utils/token.util.js";
 
 interface RegisterPayload {
     name: string;
@@ -55,15 +55,22 @@ export class UserService {
         if (!isValidPassword) {
             handleError("Invalid email or password", "UNAUTHORIZED", 401);
         }
-
         const token = await generatePasetoToken({
             sub: user.id,
             email: user.email,
-            iat: Math.floor(Date.now() / 1000),
-            exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7,
+            iat: new Date().toISOString(),
+            exp: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString(),
         });
 
         return token;
 
+    }
+
+
+    public static async getUserById(id: string) {
+        if (!id) {
+            handleError("User ID is required", "BAD_REQUEST", 400);
+        }
+        return prismaClient.user.findUnique({ where: { id } });
     }
 }

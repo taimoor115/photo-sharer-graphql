@@ -1,2 +1,6 @@
-export const queries = ``;
+export const queries = `#graphql
+
+    getCurrentUser: User
+
+`;
 
