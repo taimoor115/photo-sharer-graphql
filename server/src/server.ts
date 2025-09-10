@@ -10,6 +10,7 @@ async function startServer() {
 
     app.use('/graphql', expressMiddleware(await startGQLServer()));
 
+
     app.listen(PORT, () => {
         console.log(`Server is running on port ${PORT}`)
     })

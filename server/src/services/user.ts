@@ -1,6 +1,8 @@
 
 import bcrypt from "bcrypt";
 import prismaClient from "../lib/db.js";
+import { generatePasetoToken } from "../utils/token.util.js";
+import { handleError } from "../utils/error.util.js";
 
 interface RegisterPayload {
     name: string;
@@ -9,69 +11,59 @@ interface RegisterPayload {
 }
 
 export class UserService {
-
     private static async findUserByEmail(email: string) {
-
         if (!email) {
-            throw new Error("Email is required");
+            handleError("Email is required", "BAD_REQUEST", 400);
         }
-
-
-        const user = await prismaClient.user.findUnique({
-            where: { email }
-        })
-
-
-        return user;
+        return prismaClient.user.findUnique({ where: { email } });
     }
+
     public static async registerUser(payload: RegisterPayload) {
         const { name, email, password } = payload;
 
-
         if (!name || !email || !password) {
-            const error: any = new Error("All fields are required");
-            error.extensions = { code: "BAD_REQUEST", httpStatus: 400 };
-            throw error;
+            handleError("All fields are required", "BAD_REQUEST", 400);
         }
-
-        if (!email.includes("@")) {
-            const error: any = new Error("Invalid email format");
-            error.extensions = { code: "BAD_REQUEST", httpStatus: 400 };
-            throw error;
-        }
-
-        if (password.length < 6) {
-            const error: any = new Error("Password too short");
-            error.extensions = { code: "BAD_REQUEST", httpStatus: 400 };
-            throw error;
-        }
-
 
         const existingUser = await this.findUserByEmail(email);
         if (existingUser) {
-            const error: any = new Error("Email already in use");
-            error.extensions = { code: "CONFLICT", httpStatus: 409 };
-            throw error;
+            handleError("Email already in use", "CONFLICT", 409);
         }
-
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const newUser = await prismaClient.user.create({
-            data: {
-                name,
-                email,
-                password: hashedPassword
-            }
+            data: { name, email, password: hashedPassword },
         });
 
-        if (!newUser) {
-            const error: any = new Error("Failed to create user");
-            error.extensions = { code: "INTERNAL_SERVER_ERROR", httpStatus: 500 };
-            throw error;
+        return newUser;
+    }
 
+    public static async loginUser(payload: { email: string; password: string }) {
+        const { email, password } = payload;
+
+        if (!email || !password) {
+            handleError("Email and password are required", "BAD_REQUEST", 400);
         }
 
-        return newUser;
+        const user = await this.findUserByEmail(email);
+        if (!user) {
+            handleError("Invalid email or password", "UNAUTHORIZED", 401);
+        }
+
+        const isValidPassword = await bcrypt.compare(password, user.password);
+        if (!isValidPassword) {
+            handleError("Invalid email or password", "UNAUTHORIZED", 401);
+        }
+
+        const token = await generatePasetoToken({
+            sub: user.id,
+            email: user.email,
+            iat: Math.floor(Date.now() / 1000),
+            exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7,
+        });
+
+        return token;
+
     }
 }

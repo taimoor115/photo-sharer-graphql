@@ -28,6 +28,9 @@ async function startGQLServer() {
 
     await server.start();
 
+
+
+
     return server;
 
 }
