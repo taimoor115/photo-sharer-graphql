@@ -14,10 +14,15 @@ async function startServer() {
         expressMiddleware(await startGQLServer(), {
             context: async ({ req }) => {
                 const token = req.header('Authorization')?.replace('Bearer ', '');
-                if (!token) { return {}; }
-                return {
-                    user: await verifyPasetoToken(token)
+                let user = null;
+                if (token) {
+                    try {
+                        user = await verifyPasetoToken(token);
+                    } catch (e) {
+                        user = null;
+                    }
                 }
+                return { user };
             },
         })
     );

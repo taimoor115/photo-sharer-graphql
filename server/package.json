@@ -15,6 +15,8 @@
   "dependencies": {
     "@apollo/server": "^5.0.0",
     "@as-integrations/express5": "^1.1.2",
+    "@aws-sdk/client-s3": "^3.884.0",
+    "@aws-sdk/s3-request-presigner": "^3.884.0",
     "@prisma/client": "^6.15.0",
     "@types/sharp": "^0.32.0",
     "bcrypt": "^6.0.0",
