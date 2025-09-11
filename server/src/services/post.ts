@@ -140,5 +140,38 @@ export class PostService {
 
         return "Liked post successfully....";
     }
+
+    public static async getPosts(cursor?: string, limit: number = 10) {
+        const findManyArgs: any = {
+            take: limit + 1,
+            skip: cursor ? 1 : 0,
+            orderBy: { createdAt: "desc" },
+            include: {
+                author: true,
+                _count: {
+                    select: { likes: true },
+                },
+            },
+        };
+        if (cursor) {
+            findManyArgs.cursor = { id: cursor };
+        }
+        const posts = await prismaClient.post.findMany(findManyArgs) || [];
+
+        let nextCursor: string | null = null;
+        if (posts.length > limit) {
+            const nextItem = posts.pop();
+            nextCursor = nextItem?.id ?? null;
+        }
+
+
+        return {
+            posts: posts.map((p: any) => ({
+                ...p,
+                likeCount: p._count.likes,
+            })),
+            nextCursor,
+        };
+    }
 }
 

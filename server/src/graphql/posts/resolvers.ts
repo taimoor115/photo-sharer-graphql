@@ -2,8 +2,8 @@ import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { AWS_ACCESS_ID, AWS_DEFAULT_REGION, AWS_SECRET_KEY, BUCKET_NAME } from "../../config/env.config.js";
 import type { CreatePostPayload, GraphqlContext } from "../../interfaces.js";
-import { handleError } from "../../utils/error.util.js";
 import { PostService } from "../../services/post.js";
+import { handleError } from "../../utils/error.util.js";
 
 
 
@@ -79,6 +79,14 @@ const queries = {
 
         return signedURL;
     },
+
+
+
+    getPosts: async (_: any, { cursor, limit = 10 }: { cursor?: string, limit?: number }, ctx: GraphqlContext) => {
+        if (!ctx.user || !ctx.user.sub) return handleError("Unauthorized", "UNAUTHORIZED", 401);
+        const posts = await PostService.getPosts(cursor, limit);
+        return posts;
+    }
 
 }
 

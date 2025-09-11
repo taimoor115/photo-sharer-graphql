@@ -9,9 +9,15 @@ export const typeDefs = `#graphql
         id: ID!
         caption: String
         imageUrl: String!
-        author: [User]!
+        author: User!
+
         createdAt: String!
         updatedAt: String!
+        likeCount: Int!
     }
+    type PaginatedPosts {
+        posts: [Post!]!
+        nextCursor: String
+}
 
 `
