@@ -25,7 +25,8 @@ async function startGQLServer() {
             Mutation: {
                 ...User.resolvers.Mutation,
                 ...Post.resolvers.Mutation
-            }
+            },
+            ...User.resolvers.ExtraResolvers
         },
     })
 

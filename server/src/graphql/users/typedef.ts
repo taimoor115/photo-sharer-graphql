@@ -10,5 +10,20 @@ export const typeDefs = `
         updatedAt: String!
     }
 
+     type Post {
+        id: ID!
+        caption: String
+        imageUrl: String!
+        author: User!
+        createdAt: String!
+        updatedAt: String!
+        likeCount: Int!
+  }
+
+
+    type GetUserAndPost {
+        user: User!
+        posts: [Post!]!
+    }
 
 `

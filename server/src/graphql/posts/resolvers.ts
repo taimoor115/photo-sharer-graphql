@@ -4,6 +4,7 @@ import { AWS_ACCESS_ID, AWS_DEFAULT_REGION, AWS_SECRET_KEY, BUCKET_NAME } from "
 import type { CreatePostPayload, GraphqlContext } from "../../interfaces.js";
 import { PostService } from "../../services/post.js";
 import { handleError } from "../../utils/error.util.js";
+import { UserService } from "../../services/user.js";
 
 
 
@@ -86,8 +87,7 @@ const queries = {
         if (!ctx.user || !ctx.user.sub) return handleError("Unauthorized", "UNAUTHORIZED", 401);
         const posts = await PostService.getPosts(cursor, limit);
         return posts;
-    }
-
+    },
 }
 
 export const resolvers = {

@@ -173,5 +173,31 @@ export class PostService {
             nextCursor,
         };
     }
-}
 
+    public static async getPostsByUserId(userId: string) {
+        if (!userId) {
+            handleError("User ID is required", "BAD_REQUEST", 400);
+        }
+        const posts = prismaClient.post.findMany({
+            where: { authorId: userId, isDeleted: false },
+            orderBy: { createdAt: "desc" },
+            include: {
+                author: true,
+                _count: {
+                    select: { likes: true },
+                },
+            },
+        });
+        console.log(posts)
+        return posts;
+    }
+    public static async countLikes(postId: string) {
+        if (!postId) {
+            handleError("Post ID is required", "BAD_REQUEST", 400);
+        }
+        const count = await prismaClient.like.count({
+            where: { postId },
+        });
+        return count;
+    }
+}

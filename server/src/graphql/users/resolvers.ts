@@ -1,3 +1,4 @@
+import { PostService } from "../../services/post.js";
 import { UserService } from "../../services/user.js";
 import { handleError } from "../../utils/error.util.js";
 
@@ -10,6 +11,15 @@ const queries = {
         const user = await UserService.getUserById(sub);
         return user;
     },
+
+
+
+    getUserAndPosts: async (_: any, args: { userId: string }) => {
+        const user = await UserService.getUserById(args.userId);
+        return { user };
+    },
+
+
 };
 const mutations = {
 
@@ -28,7 +38,26 @@ const mutations = {
 
 };
 
+
+const extraResolvers = {
+    GetUserAndPost: {
+        user: (parent: any) => parent.user,
+        posts: async (parent: any) => {
+            return PostService.getPostsByUserId(parent.user.id);
+        },
+    },
+    Post: {
+        author: async (parent: any) => {
+            return UserService.getUserById(parent.authorId);
+        },
+        likeCount: async (parent: any) => {
+            return PostService.countLikes(parent.id);
+        },
+    },
+};
+
 export const resolvers = {
     Query: queries,
-    Mutation: mutations
+    Mutation: mutations,
+    ExtraResolvers: extraResolvers,
 }
