@@ -42,6 +42,11 @@ const mutations = {
         const post = await PostService.deletePost(postId, ctx.user.sub);
         return post.id
 
+    },
+    likeUnlikePost: async (_: any, { postId }: { postId: string }, ctx: GraphqlContext) => {
+        if (!ctx.user) throw new Error("You are not authenticated");
+        const post = await PostService.likeUnlikePost(postId, ctx.user.sub);
+        return post;
     }
 }
 const queries = {

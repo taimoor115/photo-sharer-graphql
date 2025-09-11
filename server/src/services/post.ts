@@ -93,7 +93,52 @@ export class PostService {
 
     }
 
+    public static async likeUnlikePost(postId: string, userId: string) {
+        if (!postId || !userId) {
+            handleError("Post ID and User ID are required", "BAD_REQUEST", 400);
+        }
+        const post = await this.findPostById(postId);
+        if (!post) {
+            handleError("Post not found", "NOT_FOUND", 404);
+        }
+        const existingLike = await prismaClient.like.findUnique({
+            where: {
+                userId_postId: {
+                    userId,
+                    postId
+                }
+            }
+        });
 
+        if (existingLike) {
+            try {
+                await prismaClient.like.delete({
+                    where: {
+                        userId_postId: {
+                            userId,
+                            postId
+                        }
+                    }
+                })
+            } catch (error) {
+                return handleError("Failed to unlike post", "INTERNAL_SERVER_ERROR", 500);
+            }
+
+            return "Unliked post successfully....";
+        }
+
+        const newLike = await prismaClient.like.create({
+            data: {
+                userId,
+                postId
+            }
+        });
+
+        if (!newLike) {
+            handleError("Failed to like post", "INTERNAL_SERVER_ERROR", 500);
+        }
+
+        return "Liked post successfully....";
+    }
 }
-
 
