@@ -7,7 +7,7 @@ services:
       dockerfile: container/Dockerfile
     container_name: photoshare-backend
     ports:
-      - "4000:4000"
+      - "9292:4000"
     environment:
       DATABASE_URL: postgres://postgres:postgres@db:5432/photoshare
       REDIS_URL: redis://redis:6379
@@ -20,7 +20,7 @@ services:
       - redis
 
   db:
-    image: postgres:14
+    image: postgres
     container_name: photoshare-db
     restart: always
     environment:
