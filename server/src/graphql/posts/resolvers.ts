@@ -56,7 +56,6 @@ const queries = {
         { imageType, imageName }: { imageType: string; imageName: string },
         ctx: GraphqlContext
     ) => {
-        console.log(ctx.user);
         if (!ctx.user || !ctx.user.sub) return handleError("Unauthorized", "UNAUTHORIZED", 401);
         const allowedImageTypes = [
             "image/jpg",

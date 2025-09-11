@@ -188,7 +188,6 @@ export class PostService {
                 },
             },
         });
-        console.log(posts)
         return posts;
     }
     public static async countLikes(postId: string) {
