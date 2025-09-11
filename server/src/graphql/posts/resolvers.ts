@@ -30,6 +30,13 @@ const mutations = {
     },
 
 
+    updatePost: async (_: any, { postId, payload }: { postId: string, payload: CreatePostPayload }, ctx: GraphqlContext) => {
+        if (!ctx.user) throw new Error("You are not authenticated");
+        const post = await PostService.updatePost(postId, payload, ctx.user.sub);
+        return post;
+    },
+
+
     deletePost: async (_: any, { postId }: { postId: string }, ctx: GraphqlContext) => {
         if (!ctx.user) throw new Error("You are not authenticated");
         const post = await PostService.deletePost(postId, ctx.user.sub);

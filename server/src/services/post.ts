@@ -30,6 +30,33 @@ export class PostService {
     }
 
 
+    public static async updatePost(postId: string, payload: { caption?: string; imageUrl?: string }, userId: string) {
+
+        if (!postId || !userId) {
+            handleError("Post ID and User ID are required", "BAD_REQUEST", 400);
+        }
+        const post = await this.findPostById(postId);
+        if (!post) {
+            handleError("Post not found", "NOT_FOUND", 404);
+        }
+        if (post.authorId !== userId) {
+            handleError("You are not authorized to update this post", "FORBIDDEN", 403);
+        }
+        const updatedPost = await prismaClient.post.update({
+            where: {
+                id: postId,
+                authorId: userId
+            },
+            data: {
+                ...payload
+            }
+        })
+        if (!updatedPost) {
+            handleError("Failed to update post", "INTERNAL_SERVER_ERROR", 500);
+        }
+        return updatedPost;
+    }
+
     public static async deletePost(postId: string, userId: string) {
 
         if (!postId || !userId) {
@@ -40,6 +67,11 @@ export class PostService {
         const post = await this.findPostById(postId);
         if (!post) {
             handleError("Post not found", "NOT_FOUND", 404);
+        }
+
+
+        if (post.authorId !== userId) {
+            handleError("You are not authorized to delete this post", "FORBIDDEN", 403);
         }
 
         const deletedPost = await prismaClient.post.update({
