@@ -8,7 +8,7 @@ export class PostService {
         if (!id) {
             handleError("Post ID is required", "BAD_REQUEST", 400);
         }
-        return prismaClient.post.findUnique({ where: { id } });
+        return prismaClient.post.findUnique({ where: { id, isDeleted: false } });
     }
 
     public static async createPost(payload: { caption: string; imageUrl: string; userId: string }) {
@@ -27,6 +27,38 @@ export class PostService {
         }
 
         return newPost;
+    }
+
+
+    public static async deletePost(postId: string, userId: string) {
+
+        if (!postId || !userId) {
+            handleError("Post ID and User ID are required", "BAD_REQUEST", 400);
+        }
+
+
+        const post = await this.findPostById(postId);
+        if (!post) {
+            handleError("Post not found", "NOT_FOUND", 404);
+        }
+
+        const deletedPost = await prismaClient.post.update({
+            where: {
+                id: postId,
+                authorId: userId
+            },
+            data: {
+                isDeleted: true
+            }
+        })
+
+
+        if (!deletedPost) {
+            handleError("Failed to delete post", "INTERNAL_SERVER_ERROR", 500);
+        }
+
+        return deletedPost;
+
     }
 
 

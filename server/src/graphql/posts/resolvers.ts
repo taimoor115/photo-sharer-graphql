@@ -28,6 +28,14 @@ const mutations = {
 
         return post;
     },
+
+
+    deletePost: async (_: any, { postId }: { postId: string }, ctx: GraphqlContext) => {
+        if (!ctx.user) throw new Error("You are not authenticated");
+        const post = await PostService.deletePost(postId, ctx.user.sub);
+        return post.id
+
+    }
 }
 const queries = {
     getSignedUrlForPost: async (
