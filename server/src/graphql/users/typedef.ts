@@ -5,7 +5,7 @@ export const typeDefs = `
         name: String!
         email: String! 
         password: String!
-        avatarUrl: String!
+        avatarUrl: String
         createdAt: String!
         updatedAt: String!
     }
