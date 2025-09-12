@@ -4,7 +4,8 @@ import { AWS_ACCESS_ID, AWS_DEFAULT_REGION, AWS_SECRET_KEY, BUCKET_NAME } from "
 import type { CreatePostPayload, GraphqlContext } from "../../interfaces.js";
 import { PostService } from "../../services/post.js";
 import { handleError } from "../../utils/error.util.js";
-import { UserService } from "../../services/user.js";
+import { pubsub, NEW_POST } from "../../lib/subscription.js";
+
 
 
 
@@ -27,8 +28,13 @@ const mutations = {
             userId: ctx.user.sub,
         });
 
+        // Publish the new post event
+        pubsub.publish(NEW_POST, { newPost: post });
+
         return post;
     },
+
+
 
 
     updatePost: async (_: any, { postId, payload }: { postId: string, payload: CreatePostPayload }, ctx: GraphqlContext) => {
@@ -89,7 +95,13 @@ const queries = {
     },
 }
 
+const subscriptions = {
+    newPost: {
+        subscribe: () => pubsub.asyncIterableIterator([NEW_POST])
+    }
+};
 export const resolvers = {
     Mutation: mutations,
-    Query: queries,
+    Query: queries, 
+    Subscription: subscriptions
 }

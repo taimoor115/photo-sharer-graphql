@@ -18,6 +18,10 @@ export const typeDefs = `#graphql
     type PaginatedPosts {
         posts: [Post!]!
         nextCursor: String
-}
+    }
+
+    type Subscription {
+    newPost: Post!
+    }
 
 `

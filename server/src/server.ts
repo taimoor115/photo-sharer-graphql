@@ -1,17 +1,23 @@
 import { expressMiddleware } from '@as-integrations/express5';
 import express from "express";
 import { PORT } from './config/env.config.js';
-import startGQLServer from './graphql/index.js';
+import startGQLServer, { schema } from './graphql/index.js';
 import { verifyPasetoToken } from './utils/token.util.js';
+import * as ws from 'ws';
+import { useServer } from 'graphql-ws/lib/use/ws';
+
 
 async function startServer() {
     const app = express()
     app.use(express.json());
 
+    const httpServer = app.listen(PORT, () => console.log(`Server running on ${PORT}`));
 
+
+    const apolloServer = await startGQLServer();
     app.use(
         "/graphql",
-        expressMiddleware(await startGQLServer(), {
+        expressMiddleware(apolloServer, {
             context: async ({ req }) => {
                 const token = req.header('Authorization')?.replace('Bearer ', '');
                 let user = null;
@@ -26,9 +32,13 @@ async function startServer() {
             },
         })
     );
-    app.listen(PORT, () => {
-        console.log(`Server is running on port ${PORT}`)
-    })
+    const wsServer = new ws.WebSocketServer({
+        server: httpServer,
+        path: "/graphql",
+    });
+
+    useServer({ schema: schema }, wsServer as any);
+
 }
 
 
