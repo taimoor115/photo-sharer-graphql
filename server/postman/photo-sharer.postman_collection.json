@@ -1,0 +1,273 @@
+{
+  "info": {
+    "name": "Photo Sharer GraphQL API",
+    "_postman_id": "a1111111-b222-4333-8444-555555555555",
+    "description": "Collection covering all GraphQL queries, mutations, and subscription for Photo Sharer server.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "registerUser",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"mutation Register($name: String, $email: String, $password: String) {\\n  registerUser(name: $name, email: $email, password: $password) {\\n    id\\n    name\\n    email\\n    createdAt\\n  }\\n}\",\n  \"variables\": {\n    \"name\": \"Test User\",\n    \"email\": \"test@example.com\",\n    \"password\": \"password123\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "loginUser",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"mutation Login($email: String, $password: String) {\\n  loginUser(email: $email, password: $password)\\n}\",\n  \"variables\": {\n    \"email\": \"test@example.com\",\n    \"password\": \"password123\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            },
+            "description": "Returns a PASETO token string. Stored to {{authToken}} via test script."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "let json;",
+                  "try { json = pm.response.json(); } catch(e) { json = null; }",
+                  "if(json && json.data && json.data.loginUser){ pm.collectionVariables.set('authToken', json.data.loginUser); pm.test('Auth token captured', function(){ pm.expect(json.data.loginUser).to.be.a('string'); }); } else { pm.test('Auth token missing', function(){ pm.expect.fail('loginUser token not found'); }); }"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "getCurrentUser",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query { getCurrentUser { id name email createdAt } }\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getUserAndPosts",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query GetUserAndPosts($userId: ID!) { getUserAndPosts(userId: $userId) { user { id name email } posts { id caption imageUrl likeCount } } }\",\n  \"variables\": { \"userId\": \"<user-id>\" }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Posts",
+      "item": [
+        {
+          "name": "getPosts",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query GetPosts($cursor: String, $limit: Int) { getPosts(cursor: $cursor, limit: $limit) { nextCursor posts { id caption imageUrl likeCount author { id name } } } }\",\n  \"variables\": { \"cursor\": null, \"limit\": 10 }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getSignedUrlForPost",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query GetSignedUrl($imageName: String!, $imageType: String!) { getSignedUrlForPost(imageName: $imageName, imageType: $imageType) }\",\n  \"variables\": { \"imageName\": \"example.jpg\", \"imageType\": \"image/jpeg\" }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "createPost",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"mutation CreatePost($payload: CreatePostData!) { createPost(payload: $payload) { id caption imageUrl likeCount author { id name } } }\",\n  \"variables\": { \"payload\": { \"caption\": \"First post\", \"imageUrl\": \"https://example.com/image.jpg\" } }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "updatePost",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"mutation UpdatePost($postId: ID!, $payload: CreatePostData!) { updatePost(postId: $postId, payload: $payload) { id caption imageUrl likeCount } }\",\n  \"variables\": { \"postId\": \"<post-id>\", \"payload\": { \"caption\": \"Updated caption\", \"imageUrl\": \"https://example.com/image.jpg\" } }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "likeUnlikePost",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"mutation LikeUnlike($postId: ID!) { likeUnlikePost(postId: $postId) }\",\n  \"variables\": { \"postId\": \"<post-id>\" }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "deletePost",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"mutation DeletePost($postId: ID!) { deletePost(postId: $postId) }\",\n  \"variables\": { \"postId\": \"<post-id>\" }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Subscriptions",
+      "item": [
+        {
+          "name": "newPost (graphql-ws)",
+          "request": {
+            "description": "Subscription note: Use a WebSocket client (e.g., GraphQL over WebSocket). Postman currently supports only legacy/graphql-ws differently; you may need Altair or GraphiQL for real-time updates.",
+            "method": "GET",
+            "url": {
+              "raw": "wss://{{wsBaseUrl}}/graphql",
+              "host": ["{{wsBaseUrl}}"],
+              "path": ["graphql"],
+              "protocol": "wss"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global pre-request script placeholder",
+          "if(!pm.collectionVariables.get('baseUrl')){ pm.collectionVariables.set('baseUrl', 'http://localhost:4000'); }",
+          "if(!pm.collectionVariables.get('wsBaseUrl')){ pm.collectionVariables.set('wsBaseUrl', 'localhost:4000'); }"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": ["// Global test script placeholder"]
+      }
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:4000" },
+    { "key": "wsBaseUrl", "value": "localhost:4000" },
+    { "key": "authToken", "value": "" }
+  ]
+}
