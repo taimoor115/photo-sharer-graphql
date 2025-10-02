@@ -6,9 +6,6 @@ import { PostService } from "../../services/post.js";
 import { handleError } from "../../utils/error.util.js";
 import { pubsub, NEW_POST } from "../../lib/subscription.js";
 
-
-
-
 const s3Client = new S3Client({
     region: AWS_DEFAULT_REGION!,
     credentials: {
@@ -16,6 +13,7 @@ const s3Client = new S3Client({
         secretAccessKey: AWS_SECRET_KEY!,
     }
 });
+
 const mutations = {
     createPost: async (
         _: any,
@@ -28,14 +26,10 @@ const mutations = {
             userId: ctx.user.sub,
         });
 
-        // Publish the new post event
         pubsub.publish(NEW_POST, { newPost: post });
 
         return post;
     },
-
-
-
 
     updatePost: async (_: any, { postId, payload }: { postId: string, payload: CreatePostPayload }, ctx: GraphqlContext) => {
         if (!ctx.user) throw new Error("You are not authenticated");
