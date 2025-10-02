@@ -1,7 +1,7 @@
 import CommonButton from "@/components/common/button";
 import { Input } from "@/components/ui/input";
+import { registerSchema } from "@/schema/register";
 import { ErrorMessage, Field, Form, Formik } from "formik";
-import * as Yup from "yup";
 
 const fields = [
   {
@@ -18,22 +18,11 @@ const fields = [
   },
   { name: "name", type: "text", label: "Name", placeholder: "Enter your name" },
 ];
-const validationSchema = Yup.object({
-  email: Yup.string().email("Invalid email").required("Required"),
-  password: Yup.string()
-    .min(8, "Password must be at least 8 characters")
-    .matches(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/,
-      "Password must contain upper, lower, number, and special character"
-    )
-    .required("Required"),
-  name: Yup.string().required("Required"),
-});
 
 const RegisterForm = ({ onSubmit }) => (
   <Formik
     initialValues={{ email: "", password: "", name: "" }}
-    validationSchema={validationSchema}
+    validationSchema={registerSchema}
     onSubmit={onSubmit}
   >
     <Form className="space-y-6">
