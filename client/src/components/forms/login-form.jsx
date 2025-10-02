@@ -1,8 +1,8 @@
 import CommonButton from "@/components/common/button";
-import { Input } from "@/components/ui/input";
-import { registerSchema } from "@/schema/register";
-import { ErrorMessage, Field, Form, Formik } from "formik";
 import Link from "next/link";
+import { Input } from "@/components/ui/input";
+import { ErrorMessage, Field, Form, Formik } from "formik";
+import * as Yup from "yup";
 import ComponentErrorBoundary from "../error-boundary";
 
 const fields = [
@@ -18,15 +18,19 @@ const fields = [
     label: "Password",
     placeholder: "Enter your password",
   },
-  { name: "name", type: "text", label: "Name", placeholder: "Enter your name" },
 ];
 
-const RegisterForm = ({ onSubmit }) => {
+const loginSchema = Yup.object({
+  email: Yup.string().email("Invalid email").required("Required"),
+  password: Yup.string().required("Required"),
+});
+
+const LoginForm = ({ onSubmit }) => {
   return (
     <ComponentErrorBoundary>
       <Formik
-        initialValues={{ email: "", password: "", name: "" }}
-        validationSchema={registerSchema}
+        initialValues={{ email: "", password: "" }}
+        validationSchema={loginSchema}
         onSubmit={onSubmit}
       >
         <Form className="space-y-6">
@@ -62,18 +66,15 @@ const RegisterForm = ({ onSubmit }) => {
             type="submit"
             className="w-full cursor-pointer mt-6 h-11 text-base font-semibold rounded-lg shadow bg-primary hover:bg-primary/90 transition-colors duration-200"
           >
-            Create Account
+            Login
           </CommonButton>
           <div className="flex flex-col gap-2 mt-2">
             <span className="text-sm text-muted-foreground">
-              Already have an account?
+              Don't have an account?
             </span>
-            <Link
-              href="/login"
-              className="text-primary hover:underline text-sm font-medium mt-2 text-center"
-            >
+            <Link href="/register">
               <CommonButton variant="outline" className="w-full cursor-pointer">
-                Go to Login
+                Go to Register
               </CommonButton>
             </Link>
           </div>
@@ -83,4 +84,4 @@ const RegisterForm = ({ onSubmit }) => {
   );
 };
 
-export default RegisterForm;
+export default LoginForm;
