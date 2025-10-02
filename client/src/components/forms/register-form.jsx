@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import CommonButton from "@/components/common/button";
 import { Input } from "@/components/ui/input";
 import { ErrorMessage, Field, Form, Formik } from "formik";
 import * as Yup from "yup";
@@ -63,12 +63,12 @@ const RegisterForm = ({ onSubmit }) => (
           </ErrorMessage>
         </div>
       ))}
-      <Button
+      <CommonButton
         type="submit"
         className="w-full cursor-pointer mt-6 h-11 text-base font-semibold rounded-lg shadow bg-primary hover:bg-primary/90 transition-colors duration-200"
       >
         Create Account
-      </Button>
+      </CommonButton>
     </Form>
   </Formik>
 );
